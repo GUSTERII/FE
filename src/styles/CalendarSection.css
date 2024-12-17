@@ -1,159 +1,89 @@
-.menu-container {
-    width: 25%;
-    background-color: #102752;
-    color: white;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-  
-  .menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    margin-bottom: 20px;
-  }
-  
-  .menu-header h2 {
-    color: #e63946;
-    font-size: 24px;
-  }
-  
-  .calendar-mini {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    margin-bottom: 20px;
-  }
-  
-  .calendar-mini .day-header {
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .calendar-mini div {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    border-radius: 50%;
-    background-color: transparent;
-    color: white;
-  }
-  
-  .calendar-mini .current-day {
-    background-color: #007bff;
-    font-weight: bold;
-    color: white;
-  }
-  
-  .calendar-mini .inactive-day {
-    color: #888; /* Zilele din alte luni */
-  }
-  
-  .events-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex-grow: 1;
-    overflow-y: auto;
-  }
-  
-  .events-list li {
-    margin-bottom: 10px;
-    background-color: #292929;
-    padding: 10px;
-    border-radius: 5px;
-  }
-  
-  .events-list .event-time {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .events-list .event-detail,
-  .events-list .event-location {
-    font-size: 14px;
-    color: #bdbdbd;
-  }
-  
-  .view-exams-button {
-    background-color: #e63946;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-  }
-  
-  .calendar-container {
-    display: flex;
-    width: 100%;
-    height: 100vh;
-  }
-  
-  .menu-container {
-    width: 25%;
-    background-color: #102752;
-    color: white;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .calendar-main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: white;
+.calendar-section {
+  margin: 20px auto;
+  width: 90%;
+  max-width: 800px;
+  font-family: Arial, sans-serif;
 }
 
-.calendar-main-header {
-  display: grid;
-  grid-template-columns: 60px repeat(7, 1fr); /* 60px pentru ore */
-  background-color: #e63946;
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  text-align: center;
+  padding: 10px;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+.toggle-form-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4caf50;
   color: white;
-  text-align: center;
-  padding: 0; /* Eliminăm orice padding */
-  margin: 0; /* Eliminăm margin */
-  font-weight: bold;
-  height: 40px; /* Ajustăm înălțimea pentru a elimina spațiul alb */
-}
-
-.calendar-main-grid {
-  display: grid;
-  grid-template-columns: 60px repeat(7, 1fr); /* Prima coloană pentru ore */
-  grid-template-rows: repeat(13, 1fr); /* 13 rânduri pentru orele 8:00-20:00 */
-  gap: 0; /* Eliminăm spațiul dintre celule */
-  flex-grow: 1;
-  border: 1px solid #ddd;
-}
-
-.hour-label {
-  background-color: #f9f9f9;
-  border-right: 1px solid #ddd;
-  text-align: center;
-  line-height: 70px; /* Înălțime consistentă cu header */
-  font-weight: bold;
-  font-size: 14px; /* Ajustează dimensiunea textului */
-}
-
-.calendar-cell {
-  border: 1px solid #ddd;
-  background-color: #f9f9f9;
-  text-align: center;
-  font-size: 14px; /* Ajustează dimensiunea textului */
-  line-height: 40px; /* Asigură centrarea verticală */
-}
-
-.calendar-cell:hover {
-  background-color: #f0f0f0;
+  border: none;
   cursor: pointer;
+  border-radius: 5px;
+}
+
+.toggle-form-btn:hover {
+  background-color: #45a049;
+}
+
+.form-container {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  opacity: 0;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.form-container.visible {
+  max-height: 500px; /* Ajustează în funcție de conținut */
+  opacity: 1;
+}
+
+input,
+button {
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #45a049;
 }

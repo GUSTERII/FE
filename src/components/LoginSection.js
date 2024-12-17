@@ -10,11 +10,11 @@ const LoginSection = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin1 = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8081/login", {
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: email, password }),
@@ -22,7 +22,7 @@ const LoginSection = () => {
 
       if (response.ok) {
         console.log("Autentificare reușită!");
-        login(); // Actualizare stare autentificare
+        login(email); // Trimite email-ul pentru setarea rolului
         navigate("/orar"); // Redirectionare la pagina Orar
       } else {
         const data = await response.json();
@@ -31,46 +31,6 @@ const LoginSection = () => {
     } catch (err) {
       console.error("Eroare la autentificare:", err);
       setError("A apărut o problemă. Încercați din nou.");
-    }
-  };
-  const login2 = async (email, password) => {
-    const response = await fetch("http://localhost:8081/auth/sing-in", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (response.ok) {
-      try {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-          return await response.json();
-        } else {
-          return {}; // Return an empty object if there's no JSON body
-        }
-      } catch (error) {
-        return {}; // Return an empty object if parsing fails
-      }
-    } else {
-      throw new Error("Login failed");
-    }
-  };
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await login2(email, password);
-      console.log("Login response:", response);
-      login(); // Actualizare stare autentificare
-      navigate("/orar"); // Redirectionare la pagina Orar
-    } catch (error) {
-      console.error("Login failed:", error.message);
-      if (error.message === "Login failed") {
-        setError("Email sau parolă greșită.");
-      } else {
-        setError("A apărut o problemă. Încercați din nou.");
-      }
     }
   };
 
@@ -100,7 +60,7 @@ const LoginSection = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-
+            
             <button type="submit">Loghează-te</button>
           </form>
           {error && <p className="error-message">{error}</p>}

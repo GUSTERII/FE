@@ -2,7 +2,6 @@
   "name": "front-end",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8081",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -44,6 +43,8 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.48",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.14",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4"
   }
 }
