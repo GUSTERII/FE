@@ -1,0 +1,7 @@
+email:parola
+test@example.com:1234
+user2@example.com:abcd
+test@student.usv.ro:1234
+test@sefsemigrupa.usv.ro:1234
+test@profesor.usv.ro:1234
+test@secretar.usv.ro:1234

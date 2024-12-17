@@ -1,0 +1,3 @@
+email:parola
+test@example.com:1234
+user2@example.com:abcd

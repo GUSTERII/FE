@@ -1,0 +1,43 @@
+.flexbox {
+    width: 100%;
+    background-color: #102752;
+    display: flex;
+    justify-content: space-evenly; /* Pentru a pune iconitele uniform pe orizontala*/
+    align-items: center;
+    padding: 20px 0; /* Spatiere sus si jos */
+}
+
+.icon-container {
+    display: flex;
+    flex-direction: row; /* Aranjarea iconitei si textului pe orizontala */
+    align-items: center;
+    color: white;
+    text-align: left;
+    gap: 15px; 
+}
+
+.icon-container svg {
+    width: 88px;
+    height: 88px;
+}
+
+.icon-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.icon-title {
+    font-family: 'Raleway', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.icon-subtitle {
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0;
+    margin-top: 5px;
+    opacity: 0.8;  /* efect fancy */
+}
