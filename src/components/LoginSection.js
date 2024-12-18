@@ -14,15 +14,16 @@ const LoginSection = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch(LOGIN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
+        const data = await response.json();
         console.log("Autentificare reușită!");
-        login(email); // Trimite email-ul pentru setarea rolului
+        login(data); // Trimite email-ul pentru setarea rolului
         navigate("/orar"); // Redirectionare la pagina Orar
       } else {
         const data = await response.json();

@@ -1,0 +1,1 @@
+export const BE_URL = 'https://gusteriibe-c0brancqaufvfyc5.canadacentral-01.azurewebsites.net';

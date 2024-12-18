@@ -10,13 +10,9 @@ export const AuthProvider = ({ children }) => {
     () => localStorage.getItem("role") || null
   );
 
-  const login = (email) => {
+  const login = (tokenData) => {
     let userRole = null;
-    if (email.endsWith("@student.usv.ro")) userRole = "student";
-    else if (email.endsWith("@sefsemigrupa.usv.ro")) userRole = "sefsemigrupa";
-    else if (email.endsWith("@profesor.usv.ro")) userRole = "profesor";
-    else if (email.endsWith("@secretar.usv.ro")) userRole = "secretar";
-
+    userRole = tokenData.role;
     setIsLoggedIn(true);
     setRole(userRole);
     localStorage.setItem("isLoggedIn", true);
