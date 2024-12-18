@@ -1,3 +1,4 @@
+import { BE_URL } from '../constants/URIs';
 export const GET_SPECIALIZATION_BY_TEACHER_URL = `${BE_URL}/specialization/teacher`;
 export const UPDATE_SPECIALIZATION_URL = `${BE_URL}/specialization/update`;
 export const UPDATE_SPECIALIZATION_TEACHER_URL = `${BE_URL}/specialization/teacher`;

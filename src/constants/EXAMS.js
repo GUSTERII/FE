@@ -1,3 +1,4 @@
+import { BE_URL } from '../constants/URIs';
 // exams
 const CREATE_EXAM_URL = `${BE_URL}/exam/create`;
 const GET_EXAM_URL = `${BE_URL}/exam`;

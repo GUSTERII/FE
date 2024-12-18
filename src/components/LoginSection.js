@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/LoginSection.css";
+import { LOGIN_URL } from '../constants/AUTH'
 
 const LoginSection = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +10,7 @@ const LoginSection = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -61,7 +63,7 @@ const LoginSection = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            
+
             <button type="submit">Loghează-te</button>
           </form>
           {error && <p className="error-message">{error}</p>}
