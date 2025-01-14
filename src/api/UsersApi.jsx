@@ -1,4 +1,6 @@
-const basicURL = "http://localhost:8081/users";
+import { BE_URL } from "../constants/URIs";
+
+const basicURL = BE_URL + "/users";
 const changePasswordURL = basicURL + "/change-password";
 const getTeachersURL = basicURL + "/teachers";
 
@@ -44,7 +46,12 @@ export const getUserByEmail = async (email, token) => {
   }
 };
 
-export const changePassword = async (currentPassword, newPassword, confirmPassword, token) => {
+export const changePassword = async (
+  currentPassword,
+  newPassword,
+  confirmPassword,
+  token
+) => {
   const bearer = "Bearer " + token;
   const response = await fetch(changePasswordURL, {
     method: "POST",

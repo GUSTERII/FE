@@ -1,4 +1,6 @@
-const baseGroupUrl = "http://localhost:8081/grupa";
+import { BE_URL } from '../constants/URIs';
+
+const baseGroupUrl = BE_URL+"/grupa";
 const getGroupsURL = baseGroupUrl + "/all";
 const createGroupURL = baseGroupUrl + "/create";
 

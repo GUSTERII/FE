@@ -1,4 +1,5 @@
-const baseRoomsUrl = "http://localhost:8081/sali";
+import { BE_URL } from '../constants/URIs';
+const baseRoomsUrl = BE_URL+"/sali";
 const getRoomsURL = baseRoomsUrl + "/all";
 const addRoomURL = baseRoomsUrl + "/add";
 const updateRoomURL = baseRoomsUrl + "/update";

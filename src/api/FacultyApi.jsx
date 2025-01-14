@@ -1,4 +1,6 @@
-const baseFacultyUrl = "http://localhost:8081/facultate";
+import { BE_URL } from '../constants/URIs';
+
+const baseFacultyUrl = BE_URL+"/facultate";
 const getFacultiesURL = baseFacultyUrl + "/all";
 const addFacultyURL = baseFacultyUrl + "/add";
 const updateFacultyURL = baseFacultyUrl + "/update";

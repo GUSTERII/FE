@@ -1,4 +1,5 @@
-const studentsBaseURL = "http://localhost:8081/student";
+import { BE_URL } from '../constants/URIs';
+const studentsBaseURL = BE_URL+"/student";
 const getStudentsURL = studentsBaseURL + "/all";
 // const addStudentURL = studentsBaseURL + "/add";
 const editStudentURL = studentsBaseURL + "/update";

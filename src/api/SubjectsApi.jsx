@@ -1,4 +1,5 @@
-const baseSubjectUrl = "http://localhost:8081/materie";
+import { BE_URL } from '../constants/URIs';
+const baseSubjectUrl = BE_URL+"/materie";
 const getSubjectsURL = baseSubjectUrl;
 const addSubjectURL = baseSubjectUrl;
 const deleteSubjectURL = baseSubjectUrl + "/delete";

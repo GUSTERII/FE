@@ -1,4 +1,5 @@
-const baseSpecializationUrl = "http://localhost:8081/specialization";
+import { BE_URL } from '../constants/URIs';
+const baseSpecializationUrl = BE_URL+"/specialization";
 const getSpecializationsURL = baseSpecializationUrl + "/all";
 const addSpecializationURL = baseSpecializationUrl + "/add";
 const updateSpecializationURL = baseSpecializationUrl + "/update";

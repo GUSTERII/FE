@@ -1,4 +1,5 @@
-const baseExamsURL = "http://localhost:8081/exam";
+import { BE_URL } from '../constants/URIs';
+const baseExamsURL = BE_URL+"/exam";
 const getExamsURL = baseExamsURL + "/get";
 const createExamsURL = baseExamsURL + "/create";
 const confirmExamsURL = baseExamsURL + "/confirm";

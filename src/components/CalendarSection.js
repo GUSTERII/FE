@@ -26,95 +26,73 @@ const ExamCalendar = () => {
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [selectedDegree, setSelectedDegree] = useState(null);
   const [faculties, setFaculties] = useState([]);
+  const [degrees, setDegrees] = useState([]);
+  const [filteredExams, setFilteredExams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddExamModal, setShowAddExamModal] = useState(false);
   const [showEditExamModal, setShowEditExamModal] = useState(false);
   const [showViewDetailsModal, setShowViewDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [degrees, setDegrees] = useState([]);
-  const [filteredExams, setFilteredExams] = useState([]);
 
-  let user = useSelector((state) => state.user.user);
-  if (!user || !user.token) {
-    console.log("User token is null");
-    user = { token: null, role: "STUDENT" };
-  }
+  const user = useSelector((state) => state.user.user) || { token: null, role: "STUDENT" };
 
   const handleOnSelectEvent = (event) => {
     setSelectedEvent(event);
     setShowViewDetailsModal(true);
   };
 
-  const handleOpenEditModal = () => {
-    setShowViewDetailsModal(false);
-    setShowEditExamModal(true);
+  const fetchFacultiesAndDegrees = async () => {
+    try {
+      const [facultiesData, degreesData] = await Promise.all([
+        getAllFaculties(),
+        getAllSpecializations(),
+      ]);
+      setFaculties(facultiesData);
+      setDegrees(degreesData);
+    } catch (error) {
+      toast.error(`Error fetching faculties or degrees: ${error.message}`);
+    }
+  };
+
+  const fetchExams = async () => {
+    if (selectedFaculty && selectedDegree) {
+      setLoading(true);
+      try {
+        const examsData = await getExamsBySpecialization(selectedDegree.label);
+        setFilteredExams(examsData);
+      } catch (error) {
+        toast.error(`Error fetching exams: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const facultiesData = await getAllFaculties();
-        setFaculties(facultiesData);
-
-        const degreesData = await getAllSpecializations();
-        setDegrees(degreesData);
-      } catch (error) {
-        toast.error("Error fetching faculties or degrees: " + error.message);
-      }
-
-    };
-
-    fetchOptions();
+    fetchFacultiesAndDegrees();
   }, []);
 
   useEffect(() => {
-    const fetchExams = async () => {
-      if (selectedFaculty && selectedDegree) {
-        setLoading(true);
-        try {
-          const examsData = await getExamsBySpecialization(selectedDegree.label);
-          setFilteredExams(examsData);
-        } catch (error) {
-          toast.error("Error fetching exams: " + error.message);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
     fetchExams();
   }, [selectedFaculty, selectedDegree]);
 
-  const events = filteredExams.map((exam, index) => {
-    return {
-      id: index,
-      title: exam.name,
-      materie: exam.materie,
-      start: moment(exam.date, "HH:mm DD-MM-YYYY").toDate(),
-      end: moment(exam.date, "HH:mm DD-MM-YYYY")
-        .add(exam.duration, "hours")
-        .toDate(),
-      desc: exam.description,
-      location: exam.classroom,
-      group: exam.group,
-      status: exam.status,
-    };
+  const events = filteredExams.map((exam, index) => ({
+    id: index,
+    title: exam.name,
+    materie: exam.materie,
+    start: moment(exam.date, "HH:mm DD-MM-YYYY").toDate(),
+    end: moment(exam.date, "HH:mm DD-MM-YYYY").add(exam.duration, "hours").toDate(),
+    desc: exam.description,
+    location: exam.classroom,
+    group: exam.group,
+    status: exam.status,
+  }));
+
+  const eventStyleGetter = (event) => ({
+    style: {
+      backgroundColor: event.status === "CONFIRMED" ? "green" : "orange",
+    },
   });
-
-  const eventStyleGetter = (event) => {
-    let backgroundColor = "";
-    if (event.status === "CONFIRMED") {
-      backgroundColor = "green";
-    } else if (event.status === "PENDING_CONFIRMATION") {
-      backgroundColor = "orange";
-    }
-
-    return {
-      style: {
-        backgroundColor,
-      },
-    };
-  };
 
   const mapSelectedEventToForm = (event) => {
     if (!event) return null;
@@ -131,23 +109,15 @@ const ExamCalendar = () => {
     };
   };
 
-  const handleCloseAddExamModal = async () => {
-    setShowAddExamModal(false);
-    try {
-      const examsData = await getExamsBySpecialization(selectedDegree.label);
-      setFilteredExams(examsData);
-    } catch (error) {
-      toast.error("Error fetching exams: " + error.message);
-    }
-  };
-
-  const handleCloseEditExamModal = async () => {
-    setShowEditExamModal(false);
-    try {
-      const examsData = await getExamsBySpecialization(selectedDegree.label);
-      setFilteredExams(examsData);
-    } catch (error) {
-      toast.error("Error fetching exams: " + error.message);
+  const handleModalClose = async (closeModalFn) => {
+    closeModalFn(false);
+    if (selectedDegree) {
+      try {
+        const examsData = await getExamsBySpecialization(selectedDegree.label);
+        setFilteredExams(examsData);
+      } catch (error) {
+        toast.error(`Error fetching exams: ${error.message}`);
+      }
     }
   };
 
@@ -156,47 +126,22 @@ const ExamCalendar = () => {
       <ToastContainer />
       <Box display="flex" justifyContent="flex-start" gap="20px">
         <Select
-          options={faculties.map((faculty) => ({
-            value: faculty.id,
-            label: faculty.name,
-          }))}
+          options={faculties.map(({ id, name }) => ({ value: id, label: name }))}
           isSearchable
           isDisabled={faculties.length === 0}
-          value={
-            selectedFaculty
-              ? { value: selectedFaculty.value, label: selectedFaculty.label }
-              : null
-          }
+          value={selectedFaculty || null}
           placeholder="Select Faculty"
-          onChange={(selectedOption) => {
-            setSelectedFaculty({
-              value: selectedOption.value,
-              label: selectedOption.label,
-              name: selectedOption.label,
-            });
-          }}
+          onChange={(option) => setSelectedFaculty(option)}
         />
         <Select
           options={degrees
-            .filter(
-              (degree) =>
-                selectedFaculty && degree.facultateName === selectedFaculty.name
-            )
-            .map((degree) => ({
-              value: degree.id,
-              label: degree.name,
-            }))}
+            .filter((degree) => selectedFaculty?.label === degree.facultateName)
+            .map(({ id, name }) => ({ value: id, label: name }))}
           isSearchable
-          value={
-            selectedDegree
-              ? { value: selectedDegree.value, label: selectedDegree.label }
-              : null
-          }
-          placeholder="Select Degree"
-          onChange={(selectedOption) => {
-            setSelectedDegree(selectedOption);
-          }}
           isDisabled={!selectedFaculty}
+          value={selectedDegree || null}
+          placeholder="Select Degree"
+          onChange={setSelectedDegree}
         />
         <Button
           variant="contained"
@@ -208,12 +153,7 @@ const ExamCalendar = () => {
         </Button>
       </Box>
       {loading ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="500px"
-        >
+        <Box display="flex" justifyContent="center" alignItems="center" height="500px">
           <CircularProgress />
         </Box>
       ) : selectedFaculty && selectedDegree ? (
@@ -229,9 +169,9 @@ const ExamCalendar = () => {
             startAccessor="start"
             endAccessor="end"
             style={{ height: 500 }}
-            views={["month", "week", "day"]}
+            views={['month', 'week', 'day']}
             min={new Date(0, 5, 1, 8, 0)}
-            max={new Date(0, 5, 21, 21, 0)}
+            max={new Date(0, 5, 1, 21, 0)}
             onSelectEvent={handleOnSelectEvent}
             eventPropGetter={eventStyleGetter}
           />
@@ -243,20 +183,21 @@ const ExamCalendar = () => {
       )}
       <ExamsAddModal
         open={showAddExamModal}
-        onClose={handleCloseAddExamModal}
-        onSave={() => setShowAddExamModal(false)}
+        onClose={() => handleModalClose(setShowAddExamModal)}
       />
       <ExamsViewDetailsModal
         event={mapSelectedEventToForm(selectedEvent)}
         open={showViewDetailsModal}
         onClose={() => setShowViewDetailsModal(false)}
-        onEdit={handleOpenEditModal}
+        onEdit={() => {
+          setShowViewDetailsModal(false);
+          setShowEditExamModal(true);
+        }}
       />
       <ExamsEditModal
         event={mapSelectedEventToForm(selectedEvent)}
         open={showEditExamModal}
-        onClose={handleCloseEditExamModal}
-        onSave={() => setShowEditExamModal(false)}
+        onClose={() => handleModalClose(setShowEditExamModal)}
       />
     </Container>
   );

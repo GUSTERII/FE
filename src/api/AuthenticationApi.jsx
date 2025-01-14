@@ -1,4 +1,5 @@
-const basicURL = "http://localhost:8081/auth";
+import { BE_URL } from '../constants/URIs';
+const basicURL = BE_URL;
 const loginURL = basicURL + "/sign-in";
 const forgotPasswordURL = basicURL + "/forgot-password";
 const resetPasswordURL = basicURL + "/reset-password";
