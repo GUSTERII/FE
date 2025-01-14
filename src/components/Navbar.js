@@ -1,57 +1,70 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../redux/userActions"; // Import the logout action
 import "../styles/Navbar.css";
 
 const Navbar = () => {
-  const { isLoggedIn, logout } = useAuth(); // folosirea contextului
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Access the isLoggedIn state from Redux
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+
   const handleLogout = () => {
-    logout(); // Resetare logare
-    navigate("/"); // Redirectionare la pagina principala
+    dispatch(logout()); // Dispatch the logout action to reset login state
+    navigate("/"); // Redirect to the homepage
   };
 
   return (
-    <div className="navbar">
+    <nav className="navbar">
       {/* Logo */}
-      <NavLink to="/" className="navbar-logo">
+      <NavLink to="/" className="navbar-logo" aria-label="Homepage">
         USV Exams
       </NavLink>
 
-      {/* Linkuri */}
+      {/* Navigation links */}
       <div className="navbar-links">
         <NavLink
           to="/"
-          className={({ isActive }) => (isActive ? "navbar-link active" : "navbar-link")}
+          className={({ isActive }) =>
+            isActive ? "navbar-link active" : "navbar-link"
+          }
+          aria-label="Home"
         >
           Acasă
         </NavLink>
-        <span className="navbar-separator">|</span>
 
         <NavLink
           to="/despre-noi"
-          className={({ isActive }) => (isActive ? "navbar-link active" : "navbar-link")}
+          className={({ isActive }) =>
+            isActive ? "navbar-link active" : "navbar-link"
+          }
+          aria-label="About Us"
         >
           Despre Noi
         </NavLink>
-        <span className="navbar-separator">|</span>
 
         <NavLink
           to="/orar"
-          className={({ isActive }) => (isActive ? "navbar-link active" : "navbar-link")}
+          className={({ isActive }) =>
+            isActive ? "navbar-link active" : "navbar-link"
+          }
+          aria-label="Schedule"
         >
           Orar
         </NavLink>
-        <span className="navbar-separator">|</span>
 
-        {/* Se va afisa "Logare" sau "Deconectare" */}
+        {/* Conditional rendering for login/logout */}
         {!isLoggedIn ? (
           <NavLink
             to="/logare"
             className={({ isActive }) =>
-              isActive ? "navbar-link active navbar-link-right" : "navbar-link navbar-link-right"
+              isActive
+                ? "navbar-link active navbar-link-right"
+                : "navbar-link navbar-link-right"
             }
+            aria-label="Login"
           >
             Logare
           </NavLink>
@@ -59,12 +72,13 @@ const Navbar = () => {
           <button
             className="navbar-logout-button navbar-link-right"
             onClick={handleLogout}
+            aria-label="Logout"
           >
             Deconectare
           </button>
         )}
       </div>
-    </div>
+    </nav>
   );
 };
 

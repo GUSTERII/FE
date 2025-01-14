@@ -1,0 +1,4 @@
+export const ExamStatus = {
+  PENDING_CONFIRMATION: "PENDING_CONFIRMATION",
+  CONFIRMED: "CONFIRMED",
+};

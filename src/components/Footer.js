@@ -1,57 +1,87 @@
 import React from "react";
-import "../styles/Footer.css"; // Importăm fișierul CSS pentru stiluri
-import { FaFacebook, FaTwitter, FaInstagram, FaMapMarkerAlt } from "react-icons/fa";
+import "../styles/Footer.css"; // Import the CSS file for styling
+import {
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
+
+// Social media links component
+const SocialLinks = () => (
+  <div className="footer-social">
+    <a
+      href="https://facebook.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Facebook"
+    >
+      <FaFacebook />
+    </a>
+    <a
+      href="https://twitter.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Twitter"
+    >
+      <FaTwitter />
+    </a>
+    <a
+      href="https://instagram.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Instagram"
+    >
+      <FaInstagram />
+    </a>
+  </div>
+);
+
+// Footer section component (e.g., categories, terms)
+const FooterSection = ({ title, children }) => (
+  <div className="footer-section">
+    <h3>{title}</h3>
+    {children}
+  </div>
+);
 
 const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-content">
-        {/* Logo și descriere */}
+        {/* Logo and description */}
         <div className="footer-logo">
-          <h2>&lt;Gușterii&gt;</h2>
+          <h2>Gușterii</h2>
           <p>Codăm cu pasiune, inovăm cu viziune.</p>
-          <div className="footer-social">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-              <FaFacebook />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-              <FaTwitter />
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-              <FaInstagram />
-            </a>
-          </div>
+          <SocialLinks />
         </div>
 
-        {/* Secțiuni din footer */}
-        <div className="footer-section">
-          <h3>Categorii</h3>
+        {/* Footer sections */}
+        <FooterSection title="Categorii">
           <a href="#orar">Orar</a>
           <a href="#lorem1">Lorem</a>
           <a href="#lorem2">Lorem</a>
-        </div>
+        </FooterSection>
 
-        <div className="footer-section">
-          <h3>Termeni și condiții</h3>
+        <FooterSection title="Termeni și condiții">
           <a href="#politica">Politică confidențialitate</a>
           <a href="#cookies">Cookies</a>
           <a href="#lorem3">Lorem</a>
-        </div>
+        </FooterSection>
 
-        <div className="footer-section">
-          <h3>Contact</h3>
+        <FooterSection title="Contact">
           <p>&#9742; (+40) 000 000 00</p>
           <p>&#9993; gusterii@code.com</p>
           <p>
             <FaMapMarkerAlt /> Strada Universității 13
           </p>
-        </div>
+        </FooterSection>
       </div>
 
-      {/* Linie separator */}
+      {/* Separator line */}
       <hr className="footer-divider" />
 
-      {/* Linie de jos */}
+      {/* Footer bottom */}
       <div className="footer-bottom">
         <p>Copyright © 2024 Gușterii. All rights reserved.</p>
       </div>

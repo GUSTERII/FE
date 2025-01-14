@@ -1,30 +1,29 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Importăm contextul pentru autentificare
+import { useSelector } from "react-redux";
 import CalendarSection from "../components/CalendarSection";
-import Footer from '../components/Footer';
+import Footer from "../components/Footer";
+
 const Orar = () => {
-  const { isLoggedIn } = useAuth(); // Obținem starea de autentificare
   const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Access Redux state
 
   useEffect(() => {
     if (!isLoggedIn) {
-      // Dacă utilizatorul nu este logat, redirecționează la pagina de logare
+      // Redirect to the login page if the user is not logged in
       navigate("/logare");
     }
   }, [isLoggedIn, navigate]);
 
   return (
-    <div>
-    <CalendarSection/>
-    
-    <br/><br/>
-    <br/> <br/>
-    <br/> <br/>
-    <br/> <br/>
-    <br/> <br/>
-    <Footer/>
-    </div>
+    <>
+      <div id="root">
+        <div className="page-content">
+          <CalendarSection />
+        </div>
+        <Footer />
+      </div>
+    </>
   );
 };
 

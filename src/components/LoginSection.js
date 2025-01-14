@@ -1,82 +1,142 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import {
+  TextField,
+  Button,
+  Container,
+  Box,
+  Typography,
+  Link,
+} from "@mui/material";
+import "@fontsource/roboto/300.css";
+import { useDispatch } from "react-redux";
+import { loginFailure, loginSuccess } from "../redux/userActions";
+import { login } from "../api/AuthenticationApi";
 import "../styles/LoginSection.css";
-import { LOGIN_URL } from '../constants/AUTH'
 
 const LoginSection = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const dispatch = useDispatch();
 
+  const validateForm = () => {
+    const tempErrors = {};
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+    if (!email) {
+      tempErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      tempErrors.email = "Email is invalid";
+    }
 
-    try {
-      const response = await fetch(LOGIN_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    if (!password) {
+      tempErrors.password = "Password is required";
+    } else if (password.length < 8 || password.length > 20) {
+      tempErrors.password = "Password must be between 8 and 20 characters";
+    }
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Autentificare reușită!");
-        login(data); // Trimite email-ul pentru setarea rolului
-        navigate("/orar"); // Redirectionare la pagina Orar
-      } else {
-        const data = await response.json();
-        setError(data.message || "Eroare necunoscută.");
+    return tempErrors;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const tempErrors = validateForm();
+    setErrors(tempErrors);
+
+    if (Object.keys(tempErrors).length === 0) {
+      try {
+        const response = await login(email, password);
+        dispatch(loginSuccess(response));
+        navigate("/orar");
+      } catch (error) {
+        console.error("Login failed:", error.message);
+        setLoginError(true);
+        dispatch(loginFailure("Invalid email or password."));
       }
-    } catch (err) {
-      console.error("Eroare la autentificare:", err);
-      setError("A apărut o problemă. Încercați din nou.");
     }
   };
 
   return (
     <div className="login-section">
-      {/* Container pentru formularul de logare */}
-      <div className="login-form-container">
-        <div className="login-form">
-          <h2>Logare</h2>
-          <form onSubmit={handleLogin}>
-            <label htmlFor="email">Email*</label>
-            <input
-              type="email"
+      <Container component="main" maxWidth="xs">
+        <Box
+          className="flex flex-col items-center p-6 shadow-lg rounded-lg bg-white"
+          sx={{
+            marginTop: "20px",
+            padding: "30px",
+            borderRadius: "10px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+          }}
+        >
+          <Typography component="h1" variant="h5" className="mb-4">
+            Logare
+          </Typography>
+          <form className="w-full" onSubmit={handleSubmit} noValidate>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
               id="email"
-              placeholder="Introduceți mail-ul"
+              label="Email"
+              name="email"
+              autoComplete="email"
+              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              error={Boolean(errors.email)}
+              helperText={errors.email}
+              className="mb-4"
             />
-
-            <label htmlFor="password">Password*</label>
-            <input
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
               type="password"
               id="password"
-              placeholder="Introduceți parola"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              error={Boolean(errors.password)}
+              helperText={errors.password}
+              className="mb-2"
             />
-
-            <button type="submit">Loghează-te</button>
+            <Link
+              href=""
+              onClick={() => navigate("/forgot-password")}
+              className="block text-right text-blue-600 mb-4 pb-1"
+              sx={{ cursor: "pointer" }}
+            >
+              Forgot password?
+            </Link>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className="mt-4 mb-4"
+            >
+              Loghează-te
+            </Button>
+            {loginError && (
+              <Typography color="error" className="text-center">
+                Invalid email or password.
+              </Typography>
+            )}
           </form>
-          {error && <p className="error-message">{error}</p>}
+        </Box>
+        <div className="login-branding text-center mt-4">
+          <Typography variant="h3" component="h1">
+            <span>USV</span> Exams
+          </Typography>
+          <Typography variant="subtitle1">&lt;GUȘTERII&gt;</Typography>
         </div>
-      </div>
-
-      {/* Branding-ul aplicatiei */}
-      <div className="login-branding">
-        <h1>
-          <span>USV</span> Exams
-        </h1>
-        <p>&lt;GUȘTERII&gt;</p>
-      </div>
+      </Container>
     </div>
   );
 };

@@ -1,184 +1,265 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import "../styles/CalendarSection.css";
+import { useState, useEffect } from "react";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import Select from "react-select";
+import {
+  Button,
+  Typography,
+  Container,
+  Box,
+  CircularProgress,
+} from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ExamsAddModal from "./ExamsAddModal";
+import ExamsEditModal from "./ExamsEditModal";
+import ExamsViewDetailsModal from "./ExamsViewDetailsModal";
+import { getExamsBySpecialization } from "../api/ExamsApi";
+import { getAllSpecializations } from "../api/DegreeApi";
+import { getAllFaculties } from "../api/FacultyApi";
+import { useSelector } from "react-redux";
 
-const CalendarSection = () => {
-  const { role } = useAuth();
-  const [exams, setExams] = useState(() => {
-    const savedExams = localStorage.getItem("exams");
-    return savedExams ? JSON.parse(savedExams) : [];
-  });
-  const [newExam, setNewExam] = useState({
-    name: "",
-    professor: "",
-    group: "",
-    room: "",
-    date: "",
-    time: "",
-    duration: "",
-    status: "pending",
-  });
-  const [isFormVisible, setIsFormVisible] = useState(false);
+const localizer = momentLocalizer(moment);
 
-  useEffect(() => {
-    // Sterge examenele care au inceput
-    const now = new Date();
-    const updatedExams = exams.filter((exam) => {
-      const examDateTime = new Date(`${exam.date}T${exam.time}`);
-      return examDateTime > now;
-    });
-    setExams(updatedExams);
-    localStorage.setItem("exams", JSON.stringify(updatedExams));
-  }, [exams]);
+const ExamCalendar = () => {
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
+  const [selectedDegree, setSelectedDegree] = useState(null);
+  const [faculties, setFaculties] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddExamModal, setShowAddExamModal] = useState(false);
+  const [showEditExamModal, setShowEditExamModal] = useState(false);
+  const [showViewDetailsModal, setShowViewDetailsModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [degrees, setDegrees] = useState([]);
+  const [filteredExams, setFilteredExams] = useState([]);
 
-  const handleAddExam = () => {
-    if (role !== "sefsemigrupa") {
-      alert("Nu aveți permisiunea de a adăuga examene.");
-      return;
-    }
-    setExams([...exams, { ...newExam, status: "pending" }]);
-    setNewExam({
-      name: "",
-      professor: "",
-      group: "",
-      room: "",
-      date: "",
-      time: "",
-      duration: "",
-      status: "pending",
-    });
-    setIsFormVisible(false);
+  let user = useSelector((state) => state.user.user);
+  if (!user || !user.token) {
+    console.log("User token is null");
+    user = { token: null, role: "STUDENT" };
+  }
+
+  const handleOnSelectEvent = (event) => {
+    setSelectedEvent(event);
+    setShowViewDetailsModal(true);
   };
 
-  const handleApproval = (index, action) => {
-    const updatedExams = [...exams];
-    const exam = updatedExams[index];
+  const handleOpenEditModal = () => {
+    setShowViewDetailsModal(false);
+    setShowEditExamModal(true);
+  };
 
-    if (role === "profesor" && exam.status === "pending") {
-      if (action === "reject") {
-        updatedExams.splice(index, 1); // Șterge examenul dacă este refuzat
-      } else {
-        exam.status = "pending-secretar";
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const facultiesData = await getAllFaculties();
+        setFaculties(facultiesData);
+
+        const degreesData = await getAllSpecializations();
+        setDegrees(degreesData);
+      } catch (error) {
+        toast.error("Error fetching faculties or degrees: " + error.message);
       }
-    } else if (role === "secretar" && exam.status === "pending-secretar") {
-      if (action === "accept") {
-        const room = prompt("Introduceți sala pentru examen:");
-        if (room) {
-          exam.room = room;
-          exam.status = "approved";
-        } else {
-          alert("Sala este obligatorie pentru a aproba examenul.");
-          return;
+
+    };
+
+    fetchOptions();
+  }, []);
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      if (selectedFaculty && selectedDegree) {
+        setLoading(true);
+        try {
+          const examsData = await getExamsBySpecialization(selectedDegree.label);
+          setFilteredExams(examsData);
+        } catch (error) {
+          toast.error("Error fetching exams: " + error.message);
+        } finally {
+          setLoading(false);
         }
-      } else {
-        updatedExams.splice(index, 1); // Șterge examenul dacă este refuzat
       }
-    } else {
-      alert("Nu aveți permisiunea de a efectua această acțiune.");
-      return;
+    };
+
+    fetchExams();
+  }, [selectedFaculty, selectedDegree]);
+
+  const events = filteredExams.map((exam, index) => {
+    return {
+      id: index,
+      title: exam.name,
+      materie: exam.materie,
+      start: moment(exam.date, "HH:mm DD-MM-YYYY").toDate(),
+      end: moment(exam.date, "HH:mm DD-MM-YYYY")
+        .add(exam.duration, "hours")
+        .toDate(),
+      desc: exam.description,
+      location: exam.classroom,
+      group: exam.group,
+      status: exam.status,
+    };
+  });
+
+  const eventStyleGetter = (event) => {
+    let backgroundColor = "";
+    if (event.status === "CONFIRMED") {
+      backgroundColor = "green";
+    } else if (event.status === "PENDING_CONFIRMATION") {
+      backgroundColor = "orange";
     }
-    setExams(updatedExams);
+
+    return {
+      style: {
+        backgroundColor,
+      },
+    };
+  };
+
+  const mapSelectedEventToForm = (event) => {
+    if (!event) return null;
+    return {
+      title: event.title,
+      materie: event.materie,
+      date: moment(event.start).format("YYYY-MM-DD"),
+      startTime: moment(event.start).format("HH:mm"),
+      endTime: moment(event.end).format("HH:mm"),
+      classroom: event.location,
+      duration: (event.end.getTime() - event.start.getTime()) / 3600000,
+      description: event.desc,
+      group: event.group,
+    };
+  };
+
+  const handleCloseAddExamModal = async () => {
+    setShowAddExamModal(false);
+    try {
+      const examsData = await getExamsBySpecialization(selectedDegree.label);
+      setFilteredExams(examsData);
+    } catch (error) {
+      toast.error("Error fetching exams: " + error.message);
+    }
+  };
+
+  const handleCloseEditExamModal = async () => {
+    setShowEditExamModal(false);
+    try {
+      const examsData = await getExamsBySpecialization(selectedDegree.label);
+      setFilteredExams(examsData);
+    } catch (error) {
+      toast.error("Error fetching exams: " + error.message);
+    }
   };
 
   return (
-    <div className="calendar-section">
-      <h1>Calendar Examene</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Numele Examenului</th>
-            <th>Profesor</th>
-            <th>Grupa</th>
-            <th>Sala</th>
-            <th>Data și Ora</th>
-            <th>Durata (minute)</th>
-            <th>Status</th>
-            {role === "profesor" || role === "secretar" ? <th>Acțiuni</th> : null}
-          </tr>
-        </thead>
-        <tbody>
-          {exams
-            .filter((exam) => role !== "student" || exam.status === "approved")
-            .map((exam, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{exam.name}</td>
-                <td>{exam.professor}</td>
-                <td>{exam.group}</td>
-                <td>{exam.room || "-"}</td>
-                <td>
-                  {exam.date} {exam.time}
-                </td>
-                <td>{exam.duration}</td>
-                <td>{exam.status}</td>
-                {((role === "profesor" && exam.status === "pending") ||
-                  (role === "secretar" && exam.status === "pending-secretar")) && (
-                  <td>
-                    <button onClick={() => handleApproval(index, "accept")}>Acceptă</button>
-                    <button onClick={() => handleApproval(index, "reject")}>Refuză</button>
-                  </td>
-                )}
-              </tr>
-            ))}
-        </tbody>
-      </table>
-
-      {role === "sefsemigrupa" && (
-        <>
-          <button
-            className="toggle-form-btn"
-            onClick={() => setIsFormVisible(!isFormVisible)}
-          >
-            {isFormVisible ? "Închide Formularul" : "Adaugă Examen"}
-          </button>
-
-          <div className={`form-container ${isFormVisible ? "visible" : ""}`}>
-            <h2>Adaugă Examen</h2>
-            <input
-              type="text"
-              placeholder="Numele Examenului"
-              value={newExam.name}
-              onChange={(e) => setNewExam({ ...newExam, name: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Profesor"
-              value={newExam.professor}
-              onChange={(e) =>
-                setNewExam({ ...newExam, professor: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="Grupa"
-              value={newExam.group}
-              onChange={(e) => setNewExam({ ...newExam, group: e.target.value })}
-            />
-            <input
-              type="date"
-              value={newExam.date}
-              onChange={(e) => setNewExam({ ...newExam, date: e.target.value })}
-            />
-            <input
-              type="time"
-              value={newExam.time}
-              onChange={(e) => setNewExam({ ...newExam, time: e.target.value })}
-            />
-            <input
-              type="number"
-              placeholder="Durata (minute)"
-              value={newExam.duration}
-              onChange={(e) =>
-                setNewExam({ ...newExam, duration: e.target.value })
-              }
-            />
-            <button onClick={handleAddExam}>Propune Examen</button>
-          </div>
-        </>
+    <Container style={{ marginTop: "20px" }}>
+      <ToastContainer />
+      <Box display="flex" justifyContent="flex-start" gap="20px">
+        <Select
+          options={faculties.map((faculty) => ({
+            value: faculty.id,
+            label: faculty.name,
+          }))}
+          isSearchable
+          isDisabled={faculties.length === 0}
+          value={
+            selectedFaculty
+              ? { value: selectedFaculty.value, label: selectedFaculty.label }
+              : null
+          }
+          placeholder="Select Faculty"
+          onChange={(selectedOption) => {
+            setSelectedFaculty({
+              value: selectedOption.value,
+              label: selectedOption.label,
+              name: selectedOption.label,
+            });
+          }}
+        />
+        <Select
+          options={degrees
+            .filter(
+              (degree) =>
+                selectedFaculty && degree.facultateName === selectedFaculty.name
+            )
+            .map((degree) => ({
+              value: degree.id,
+              label: degree.name,
+            }))}
+          isSearchable
+          value={
+            selectedDegree
+              ? { value: selectedDegree.value, label: selectedDegree.label }
+              : null
+          }
+          placeholder="Select Degree"
+          onChange={(selectedOption) => {
+            setSelectedDegree(selectedOption);
+          }}
+          isDisabled={!selectedFaculty}
+        />
+        <Button
+          variant="contained"
+          color="secondary"
+          disabled={user.role === "STUDENT"}
+          onClick={() => setShowAddExamModal(true)}
+        >
+          Add Exam
+        </Button>
+      </Box>
+      {loading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="500px"
+        >
+          <CircularProgress />
+        </Box>
+      ) : selectedFaculty && selectedDegree ? (
+        <Box mt={2}>
+          <Calendar
+            localizer={localizer}
+            events={events.length > 0 ? events : [{
+              id: 0,
+              title: "No Exams Scheduled",
+              start: new Date(),
+              end: new Date(),
+            }]}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: 500 }}
+            views={["month", "week", "day"]}
+            min={new Date(0, 5, 1, 8, 0)}
+            max={new Date(0, 5, 21, 21, 0)}
+            onSelectEvent={handleOnSelectEvent}
+            eventPropGetter={eventStyleGetter}
+          />
+        </Box>
+      ) : (
+        <Typography variant="body1" color="textSecondary">
+          Please select a faculty and specialization.
+        </Typography>
       )}
-    </div>
+      <ExamsAddModal
+        open={showAddExamModal}
+        onClose={handleCloseAddExamModal}
+        onSave={() => setShowAddExamModal(false)}
+      />
+      <ExamsViewDetailsModal
+        event={mapSelectedEventToForm(selectedEvent)}
+        open={showViewDetailsModal}
+        onClose={() => setShowViewDetailsModal(false)}
+        onEdit={handleOpenEditModal}
+      />
+      <ExamsEditModal
+        event={mapSelectedEventToForm(selectedEvent)}
+        open={showEditExamModal}
+        onClose={handleCloseEditExamModal}
+        onSave={() => setShowEditExamModal(false)}
+      />
+    </Container>
   );
 };
 
-export default CalendarSection;
+export default ExamCalendar;
