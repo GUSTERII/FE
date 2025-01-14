@@ -26,7 +26,7 @@ const ExamsAddModal = ({ open, onClose, onSave }) => {
   const [groups, setGroups] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [examsPeriod, setExamsPeriod] = useState({ startDate: "", endDate: "" });
-
+  const [title, setTitle] = useState("");
   const user = useSelector((state) => state.user.user) || { token: null };
 
   useEffect(() => {
@@ -49,6 +49,27 @@ const ExamsAddModal = ({ open, onClose, onSave }) => {
     fetchData();
   }, [user.token]);
 
+useEffect(() => {
+    let title = "";
+
+    if (form.group) {
+      title += form.group;
+    }
+
+    if (form.materie) {
+      const materie = subjects.find((materie) => materie.name === form.materie);
+      if (materie) {
+        title += title ? ` - ${materie.name}` : materie.name;
+        if (materie.teacher) {
+          title += ` - ${materie.teacher}`;
+        }
+      }
+    }
+    form.title = title;
+
+    setTitle(title);
+  }, [form, form.group, form.materie, subjects]);
+
   const handleFieldChange = (field, value) => {
     setForm({ ...form, [field]: value });
     setErrors({ ...errors, [field]: value ? "" : "This field is required" });
@@ -59,7 +80,7 @@ const ExamsAddModal = ({ open, onClose, onSave }) => {
     if (!form.sala) newErrors.sala = "Classroom is required.";
     if (!form.subGrupa) newErrors.subGrupa = "Group is required.";
     if (!form.materie) newErrors.materie = "Subject is required.";
-    if (!form.title) newErrors.title = "Title is required.";
+    if (!title) newErrors.title = "Title is required.";
     if (!form.description || form.description.length < 10) {
       newErrors.description = "Description must be at least 10 characters.";
     }
@@ -85,6 +106,7 @@ const ExamsAddModal = ({ open, onClose, onSave }) => {
     const validationErrors = validateFormData();
     if (Object.keys(validationErrors).length === 0) {
       try {
+        form.title = title;
         await createExams(form, user.token);
         toast.success("Exam created successfully.");
         onSave();

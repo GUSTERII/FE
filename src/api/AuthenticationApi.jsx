@@ -1,5 +1,5 @@
 import { BE_URL } from '../constants/URIs';
-const basicURL = BE_URL;
+const basicURL = BE_URL+"/auth";
 const loginURL = basicURL + "/sign-in";
 const forgotPasswordURL = basicURL + "/forgot-password";
 const resetPasswordURL = basicURL + "/reset-password";
